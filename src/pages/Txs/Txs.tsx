@@ -9,10 +9,11 @@ import TxAmount from "../Tx/TxAmount";
 import { transformTx } from "../Tx/transform";
 import { useCurrentChain, useIsClassic } from "../../contexts/ChainsContext";
 import s from "./Txs.module.scss";
+import TaxRateAmount from "../Tx/TaxRateAmount";
 
 const getRow = (response: TxInfo, chainID: string, isClassic?: boolean) => {
   const transformed = transformTx(response, chainID);
-  const { txhash, tx, height, timestamp } = transformed;
+  const { txhash, tx, height, timestamp, logs } = transformed;
   const fee = get(tx, `value.fee.amount[0]`);
 
   return [
@@ -30,18 +31,28 @@ const getRow = (response: TxInfo, chainID: string, isClassic?: boolean) => {
       )}
     </span>,
     <span>
+      <TaxRateAmount logs={logs} />
+    </span>,
+    <span>
       <Finder q="blocks" v={String(height)}>
         {String(height)}
       </Finder>
     </span>,
-    <span>{fromNow(timestamp.toString())}</span>
+    <span>{fromNow(timestamp.toString())}</span>,
   ];
 };
 
 const Txs = ({ txs }: { txs: TxInfo[] }) => {
-  const head = [`TxHash`, `Type`, `Fee`, `Height`, `Time`];
-  const { chainID } = useCurrentChain();
   const isClassic = useIsClassic();
+  const head = [
+    `TxHash`,
+    `Type`,
+    `Fee`,
+    isClassic ? `Tax` : null,
+    `Height`,
+    `Time`
+  ];
+  const { chainID } = useCurrentChain();
   return (
     <div className={s.tableContainer}>
       {txs.length ? (

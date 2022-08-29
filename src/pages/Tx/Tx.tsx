@@ -23,6 +23,8 @@ import Searching from "./Searching";
 import TxAmount from "./TxAmount";
 import { transformTx } from "./transform";
 import s from "./Tx.module.scss";
+import { useIsClassic } from "../../contexts/ChainsContext";
+import TaxRateAmount from "./TaxRateAmount";
 
 const TxComponent = ({ hash }: { hash: string }) => {
   const ruleSet = useLogfinderActionRuleSet();
@@ -30,6 +32,7 @@ const TxComponent = ({ hash }: { hash: string }) => {
     () => createLogMatcherForActions(ruleSet),
     [ruleSet]
   );
+  const isClassic = useIsClassic();
   const { chainID } = useCurrentChain();
   const { data: response, progressState } = usePollTxHash(hash);
 
@@ -115,6 +118,17 @@ const TxComponent = ({ hash }: { hash: string }) => {
               {fee.map((fee, key) => (
                 <TxAmount index={key} {...fee} key={key} />
               ))}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        {isClassic ? (
+          <div className={s.row}>
+            <div className={s.head}>Tax</div>
+            <div className={s.body}>
+              <TaxRateAmount logs={tx.logs} />
             </div>
           </div>
         ) : (
